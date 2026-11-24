@@ -1,0 +1,11 @@
+title = "opencode + DeepSeek"
+adapter = "opencode"
+provider = "deepseek"
+model = "deepseek/deepseek-chat"
+family = "harness"
+env_pass = ["DEEPSEEK_API_KEY"]
+enabled = false
+notes = "Set DEEPSEEK_API_KEY in your shell, check the model name with `opencode models`, then enabled = true. Without auto_approve opencode cannot run commands headless; turn it on only in a container."
+
+[settings]
+auto_approve = false

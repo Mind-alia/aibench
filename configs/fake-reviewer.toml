@@ -1,0 +1,6 @@
+title = "Fake reviewer (prefers the longest code)"
+adapter = "fake"
+family = "test"
+
+[settings]
+prefer = "longest"

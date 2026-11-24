@@ -1,0 +1,7 @@
+title = "Claude Code + Haiku"
+adapter = "claude-code"
+provider = "anthropic"
+model = "haiku"
+family = "model-alone"
+budget_usd = 3
+notes = "Your Claude Code login, or ANTHROPIC_API_KEY (then add it to env_pass). Your user settings, plugins and MCP servers are not loaded."

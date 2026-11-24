@@ -1,0 +1,7 @@
+# Whole pipeline without any model: bin/aibench campaign campaigns/fake.toml
+name = "fake"
+tasks = ["demo-invoice"]
+configs = ["fake", "fake-lazy"]
+repeat = 2
+budget_usd = 1
+reviewers = ["fake-reviewer"]

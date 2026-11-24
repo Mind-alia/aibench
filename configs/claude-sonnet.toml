@@ -1,0 +1,6 @@
+title = "Claude Code + Sonnet"
+adapter = "claude-code"
+provider = "anthropic"
+model = "sonnet"
+family = "model-alone"
+budget_usd = 5

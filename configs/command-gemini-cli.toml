@@ -1,0 +1,12 @@
+title = "Gemini CLI (example of a generic command)"
+adapter = "command"
+provider = "google"
+model = "gemini-pro-latest"
+family = "model-alone"
+env_pass = ["GEMINI_API_KEY"]
+enabled = false
+notes = "Template for any CLI aibench does not know. Check the flags against `gemini --help` before enabling."
+
+[settings]
+command = ["gemini", "--model", "{model}", "--prompt", "{prompt}"]
+final_text = "stdout"

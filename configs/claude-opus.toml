@@ -1,0 +1,7 @@
+title = "Claude Code + Opus"
+adapter = "claude-code"
+provider = "anthropic"
+model = "opus"
+family = "model-alone"
+budget_usd = 8
+notes = "Also a reviewer candidate: aibench calibrate demo-invoice claude-opus"

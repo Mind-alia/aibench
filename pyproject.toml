@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aibench"
+version = "0.1.0"
+description = "Benchmark AI coding agents and their configurations on your own tasks: hidden tests, blind review, cost, judge calibration."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = []
+
+[project.scripts]
+aibench = "aibench.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

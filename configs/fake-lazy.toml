@@ -1,0 +1,7 @@
+title = "Fake agent that delivers a buggy solution"
+adapter = "fake"
+family = "test"
+
+[settings]
+solution = "../tasks/demo-invoice/calibration/variants/defect-lax-grouping"
+cost_usd = 0.005

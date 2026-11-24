@@ -1,0 +1,8 @@
+# First real campaign on the public demo task. Change the lists, then: bin/aibench campaign campaigns/demo.toml --dry-run
+name = "demo-1"
+tasks = ["demo-invoice"]
+configs = ["claude-haiku", "claude-sonnet", "codex", "antigravity-flash"]
+repeat = 3
+budget_usd = 10            # the campaign stops before a run that would go over (runs with unknown cost count 0)
+per_run_budget_usd = 2
+reviewers = ["claude-opus", "codex"]

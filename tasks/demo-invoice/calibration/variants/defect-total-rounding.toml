@@ -1,0 +1,2 @@
+kind = "defect"
+description = "VAT is rounded once per rate on the summed net instead of per line: three lines of 0,03 give 0.02 of VAT instead of 0.03."

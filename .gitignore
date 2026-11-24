@@ -1,0 +1,20 @@
+# Results and personal settings stay on your machine.
+runs/
+aibench.local.toml
+dashboard/data.js
+
+# Secrets never enter the repository.
+.env
+.env.*
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+build/
+dist/
+
+.DS_Store

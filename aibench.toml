@@ -1,0 +1,6 @@
+# Bench layout. Paths are relative to this file. Personal paths (private task packs, a results folder elsewhere)
+# go in aibench.local.toml, which Git ignores; AIBENCH_TASKS (paths separated by ':') adds task folders too.
+tasks_dirs = ["tasks"]
+configs_dirs = ["configs"]
+runs_dir = "runs"
+pricing_file = "pricing.toml"

@@ -1,0 +1,2 @@
+kind = "defect"
+description = "Digit grouping and mixed separators are not checked: '12,3,4' is read as 1234 and '1 23,4' as 123.4."

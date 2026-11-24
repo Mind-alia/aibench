@@ -1,0 +1,15 @@
+title = "Claude Code + Sonnet in a container"
+adapter = "claude-code"
+provider = "anthropic"
+model = "sonnet"
+family = "model-alone"
+isolation = "docker"
+image = "aibench-claude:1"
+network = "bridge"
+env_pass = ["CLAUDE_CODE_OAUTH_TOKEN"]
+budget_usd = 10
+enabled = false
+notes = "Sealed run: the container sees only the workspace. Build an image with Python 3, git and Claude Code installed, tagged aibench-claude:1. The token is read from your environment, never written here."
+
+[settings]
+skip_permissions_in_container = true

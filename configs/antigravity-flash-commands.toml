@@ -1,0 +1,11 @@
+title = "Antigravity + Gemini 3.8 Flash (high), python3 allowed"
+adapter = "antigravity"
+provider = "google"
+model = "gemini-3.8-flash-high"
+family = "model-alone"
+enabled = false
+notes = "Lets the agent run python3 (and so its tests) through a session-only permissions.allow rule passed with --settings; nothing is saved in your Antigravity settings. Off until the owner decides."
+
+[settings]
+sandbox = true
+allow_commands = ["python3"]

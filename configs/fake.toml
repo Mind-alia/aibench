@@ -1,0 +1,7 @@
+title = "Fake agent (no model, for tests)"
+adapter = "fake"
+family = "test"
+
+[settings]
+solution = "../tasks/demo-invoice/calibration/reference"
+cost_usd = 0.01

@@ -1,0 +1,21 @@
+id = "demo-invoice"
+title = "Invoice totals (demo)"
+description = "Parse amounts written the French way and compute invoice totals with per-line VAT. Small public demo task, with its hidden tests and a calibration set for judges."
+prompt_file = "prompt.md"
+seed = "seed"
+timeout_minutes = 15
+tags = ["python", "demo", "small"]
+rubric_file = "rubric.md"
+
+[[checks]]
+name = "hidden-tests"
+primary = true
+files = "hidden"
+dest = "_hidden_tests"
+command = "python3 -I _hidden_tests/run_hidden.py"
+result = "json"
+timeout_seconds = 120
+
+[calibration]
+reference = "calibration/reference"
+variants = "calibration/variants"

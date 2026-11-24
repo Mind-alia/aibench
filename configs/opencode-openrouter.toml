@@ -1,0 +1,8 @@
+title = "opencode + OpenRouter (any model)"
+adapter = "opencode"
+provider = "openrouter"
+model = "openrouter/qwen/qwen3-coder"
+family = "harness"
+env_pass = ["OPENROUTER_API_KEY"]
+enabled = false
+notes = "One key, hundreds of models: change model to compare providers. Check the name with `opencode models openrouter`."

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aibench results</title>
+<style>
+  :root {
+    --bg: #f7f7f5; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6b66; --line: #e3e2dc;
+    --accent: #2f5bd3; --ok: #2e7d4f; --bad: #b3412e; --warn: #a86b00;
+    --s1: #2f5bd3; --s2: #c2552d; --s3: #2e8a6e; --s4: #8a4fc2; --s5: #b38a00; --s6: #5c6b7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413; --panel: #1d1d1b; --ink: #ecebe6; --muted: #a3a29b; --line: #34332f;
+      --accent: #7c9bf0; --ok: #6cc28f; --bad: #e57a66; --warn: #e0b04a;
+      --s1: #7c9bf0; --s2: #e8875f; --s3: #5cc4a0; --s4: #b58ae6; --s5: #e0c050; --s6: #9aa8b5;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 32px 0 8px; }
+  .muted { color: var(--muted); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 16px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .tile b { display: block; font-size: 22px; }
+  .bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 20px; }
+  select { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--line); }
+  .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+  svg text { fill: var(--muted); font-size: 12px; }
+  .best { border-left: 3px solid var(--accent); padding-left: 10px; margin: 8px 0; }
+  #empty { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>aibench results</h1>
+  <div class="muted" id="generated"></div>
+  <div id="empty" class="panel">No data yet. Run <code>bin/aibench report</code> after a few runs; it writes <code>dashboard/data.js</code> next to this page.</div>
+  <div id="content">
+    <div class="tiles" id="tiles"></div>
+    <div class="bar"><label for="task">Task</label> <select id="task"></select> <span class="muted" id="task-desc"></span></div>
+
+    <h2>Best configuration</h2>
+    <div id="best"></div>
+
+    <h2>Cost against hidden tests passed</h2>
+    <div class="panel"><svg id="chart" width="100%" height="320" role="img" aria-label="Median cost against hidden test pass rate, one dot per configuration"></svg></div>
+
+    <h2>Configurations</h2>
+    <div class="panel"><table id="summary"></table></div>
+
+    <h2>Reviewers (how far to trust each judge)</h2>
+    <div class="panel"><table id="reviewers"></table></div>
+
+    <h2>Runs</h2>
+    <div class="panel"><table id="runs"></table></div>
+  </div>
+</main>
+<script src="data.js"></script>
+<script>
+(function () {
+  const data = window.AIBENCH_DATA;
+  const $ = (id) => document.getElementById(id);
+  if (!data || !data.runs || !data.runs.length) { $("empty").style.display = "block"; $("content").style.display = "none"; return; }
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+  const pct = (v) => v == null ? "–" : Math.round(100 * v) + "%";
+  const pct100 = (v) => v == null ? "–" : Math.round(v) + "%";
+  const usd = (v) => v == null ? "?" : v.toFixed(2) + " $";
+  const mins = (v) => v == null ? "–" : (v / 60).toFixed(1) + " min";
+  const colors = ["--s1", "--s2", "--s3", "--s4", "--s5", "--s6"].map((v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim());
+
+  $("generated").textContent = "Generated " + data.generated_at + " · aibench " + data.aibench;
+  const known = data.runs.filter((r) => r.cost_usd != null);
+  const tiles = [
+    ["Runs", data.runs.length], ["Tasks", new Set(data.runs.map((r) => r.task)).size],
+    ["Configurations", new Set(data.runs.map((r) => r.config)).size],
+    ["Known cost", usd(known.reduce((a, r) => a + r.cost_usd, 0)) + (known.length < data.runs.length ? " +" : "")],
+  ];
+  $("tiles").innerHTML = tiles.map(([k, v]) => `<div class="tile"><span class="muted">${k}</span><b>${esc(v)}</b></div>`).join("");
+
+  const tasks = data.tasks.filter((t) => data.runs.some((r) => r.task === t.id));
+  $("task").innerHTML = tasks.map((t) => `<option value="${esc(t.id)}">${esc(t.title)}</option>`).join("");
+  $("task").addEventListener("change", draw);
+
+  function draw() {
+    const task = $("task").value;
+    const info = tasks.find((t) => t.id === task) || {};
+    $("task-desc").textContent = info.description || "";
+    const rows = data.summary.filter((s) => s.task === task);
+    const configs = [...new Set(rows.map((s) => s.config))];
+    const color = (c) => colors[configs.indexOf(c) % colors.length];
+
+    const best = data.best.find((b) => b.task === task);
+    $("best").innerHTML = best ? `<div class="best">Highest hidden-test score: <b>${pct(best.top_rate)}</b>.
+      Best reviewed at that score: <b>${esc(best.best_quality)}</b>.
+      Cheapest at that score: <b>${esc(best.cheapest_at_top || "cost unknown")}</b>.
+      ${best.indicative ? '<span class="warn">Fewer than 3 runs for a leader: indicative only.</span>' : ""}</div>` : "";
+
+    chart(rows, color);
+
+    $("summary").innerHTML = `<tr><th>Configuration</th><th>Model</th><th class="num">Runs</th><th class="num">Delivered</th>
+      <th class="num">Hidden tests</th><th class="num">Range</th><th class="num">Review</th><th class="num">Cost (median)</th>
+      <th class="num">Duration</th><th class="num">Output tokens</th></tr>` + rows.map((s) => `<tr>
+      <td><span class="pill" style="border-color:${color(s.config)}">${esc(s.config)}</span>${s.indicative ? ' <span class="warn" title="fewer than 3 runs">*</span>' : ""}${s.config_versions > 1 ? ' <span class="warn" title="the config file changed between these runs">config changed</span>' : ""}</td>
+      <td>${esc(s.model || "default")}</td><td class="num">${s.runs}</td><td class="num">${s.delivered}</td>
+      <td class="num">${pct(s.rate_median)}</td><td class="num">${pct(s.rate_min)}–${pct(s.rate_max)}</td>
+      <td class="num">${pct100(s.review_pct)}</td><td class="num">${usd(s.cost_median)}${s.cost_known < s.runs ? " <span class='muted'>(" + s.cost_known + "/" + s.runs + ")</span>" : ""}</td>
+      <td class="num">${mins(s.duration_median)}</td><td class="num">${s.output_tokens_median == null ? "–" : Math.round(s.output_tokens_median).toLocaleString()}</td></tr>`).join("");
+
+    const runs = data.runs.filter((r) => r.task === task).sort((a, b) => (b.started_at || "").localeCompare(a.started_at || ""));
+    $("runs").innerHTML = `<tr><th>Run</th><th>Configuration</th><th>Status</th><th class="num">Hidden tests</th><th class="num">Review</th>
+      <th class="num">Cost</th><th class="num">Duration</th><th>Label</th></tr>` + runs.slice(0, 200).map((r) => `<tr>
+      <td>${esc(r.run_id)}</td><td>${esc(r.config)}</td>
+      <td class="${r.status === "ok" ? "ok" : "bad"}" title="${esc(r.error)}">${esc(r.status)}</td>
+      <td class="num">${r.total ? r.passed + "/" + r.total : "–"}</td><td class="num">${pct100(r.review_pct)}</td>
+      <td class="num">${usd(r.cost_usd)}${r.cost_source === "priced" ? " <span class='muted'>est.</span>" : ""}</td>
+      <td class="num">${mins(r.duration_s)}</td><td>${esc(r.label)}</td></tr>`).join("");
+  }
+
+  function chart(rows, color) {
+    const svg = $("chart");
+    const width = svg.clientWidth || 800, height = 320, pad = {l: 52, r: 20, t: 16, b: 40};
+    const points = rows.filter((s) => s.rate_median != null);
+    const maxCost = Math.max(0.01, ...points.map((s) => s.cost_median || 0)) * 1.15;
+    const x = (v) => pad.l + (v / maxCost) * (width - pad.l - pad.r);
+    const y = (v) => height - pad.b - v * (height - pad.t - pad.b);
+    let out = "";
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+      out += `<line x1="${pad.l}" x2="${width - pad.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/>`;
+      out += `<text x="${pad.l - 8}" y="${y(t) + 4}" text-anchor="end">${t * 100}%</text>`;
+    }
+    for (let i = 0; i <= 4; i++) {
+      const v = (maxCost * i) / 4;
+      out += `<text x="${x(v)}" y="${height - pad.b + 18}" text-anchor="middle">${v.toFixed(2)} $</text>`;
+    }
+    out += `<text x="${(width + pad.l) / 2}" y="${height - 4}" text-anchor="middle">median cost per run (unknown cost drawn at 0, hollow)</text>`;
+    for (const s of points) {
+      const cx = x(s.cost_median || 0), cy = y(s.rate_median), c = color(s.config);
+      const hollow = s.cost_median == null;
+      out += `<circle cx="${cx}" cy="${cy}" r="7" fill="${hollow ? "none" : c}" stroke="${c}" stroke-width="2"><title>${esc(s.config)}: ${pct(s.rate_median)} hidden tests, ${usd(s.cost_median)}, review ${pct100(s.review_pct)}</title></circle>`;
+      out += `<text x="${cx + 11}" y="${cy + 4}" style="fill:var(--ink)">${esc(s.config)}</text>`;
+    }
+    svg.innerHTML = out;
+  }
+
+  const rv = data.reviewers || [];
+  $("reviewers").innerHTML = rv.length ? `<tr><th>Reviewer</th><th>Model</th><th class="num">Reviews</th><th class="num">Agrees with tests</th>
+    <th class="num">Planted defects caught</th><th class="num">Both orders</th><th class="num">Same verdict both orders</th>
+    <th class="num">Swayed by cosmetics</th><th class="num">First slot wins</th><th class="num">Own-family bonus</th><th class="num">Cost / review</th></tr>` +
+    rv.map((r) => `<tr><td>${esc(r.reviewer)}</td><td>${esc(r.model || "default")}</td><td class="num">${r.reviews}</td>
+      <td class="num">${pct(r.agreement_with_tests)}</td><td class="num">${pct(r.defect_caught)}</td><td class="num">${pct(r.defect_caught_both_orders)}</td>
+      <td class="num">${pct(r.order_consistency)}</td><td class="num">${pct(r.cosmetic_swayed)}</td><td class="num">${pct(r.first_slot_wins)}</td>
+      <td class="num">${r.self_preference == null ? "–" : (r.self_preference > 0 ? "+" : "") + r.self_preference + " pts"}</td>
+      <td class="num">${usd(r.cost_per_review)}</td></tr>`).join("")
+    : `<tr><td class="muted">No review yet: bin/aibench review TASK REVIEWER, or calibrate a judge with bin/aibench calibrate TASK REVIEWER.</td></tr>`;
+
+  draw();
+  window.addEventListener("resize", draw);
+})();
+</script>
+</body>
+</html>

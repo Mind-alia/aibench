@@ -1,0 +1,10 @@
+title = "Antigravity + Gemini 3.8 Flash (high), no commands"
+adapter = "antigravity"
+provider = "google"
+model = "gemini-3.8-flash-high"
+family = "model-alone"
+prompt_suffix = "In this environment you cannot run any shell command (no python, no tests): do not try, the first attempt ends your turn. Read and write files only, and check your code by reading it carefully."
+notes = "Your Google login. Headless, agy refuses every shell command and stops at the first refusal, so this config tells it not to try. antigravity-flash-commands lets it run python3."
+
+[settings]
+sandbox = true

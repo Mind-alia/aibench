@@ -1,0 +1,7 @@
+title = "Codex CLI (default model)"
+adapter = "codex"
+provider = "openai"
+family = "model-alone"
+# model = "..."        # empty: the model Codex picks by default; set one to compare models
+# effort = "high"      # model_reasoning_effort
+notes = "Your ChatGPT login (or OPENAI_API_KEY in env_pass). Runs in Codex's own sandbox: writes only in the workspace, no network. Reports tokens, not dollars: add prices in pricing.toml to get a cost."

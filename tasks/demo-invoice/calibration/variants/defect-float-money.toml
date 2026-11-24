@@ -1,0 +1,2 @@
+kind = "defect"
+description = "Line net and VAT are computed with floats and round(): 3 x 0,335 gives 1.00 instead of 1.01, and halves round to even."

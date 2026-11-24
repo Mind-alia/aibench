@@ -1,0 +1,8 @@
+# Prices used only when a tool does not report its own cost (Codex and Antigravity report tokens, not dollars).
+# Dollars per million tokens. Fill in the prices you pay; a model missing here gets cost "unknown", never a guess.
+# The key is the model name exactly as written in the config (`model = ...`).
+#
+# [models."example-model"]
+# input = 1.25          # uncached input tokens
+# cached_input = 0.125  # input tokens read from cache
+# output = 10.0
